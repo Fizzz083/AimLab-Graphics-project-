@@ -18,14 +18,15 @@
 
 
 using namespace std;
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
 double Txval=0,Tyval=0,Tzval=0, arodure=60;
 double radius = 80;
 double eyex = 80;
 double eyey = 60;
 double eyez = radius;
-double centerx = 80;
-double centery = 60;
+double centerx = eyex;
+double centery = eyey;
 double centerz = 0;
 double upx = 0;
 double upy = 1;
@@ -297,12 +298,119 @@ void draw_room()
 
 }
 
+double ball_radius = 5;
+
+void draw_ball()
+{
+    gpu;
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient[] = { 0.6, 0, 0, 1.0 };
+    GLfloat mat_diffuse[] = { 0.3, 0.3, 1,1.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = {40};
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+
+    glutSolidSphere(ball_radius,50,50);
+    gpo;
+}
+
+const double pi = acos(-1);
+const double eps = 1e-6;
+inline int dcmp (double x) { if (fabs(x) < eps) return 0; else return x < 0 ? -1 : 1; }
+inline double torad(double deg) { return deg / 180 * pi; }
+
+struct Point3D{
+    double x, y, z;
+    Point3D() {}
+    void read () {cin>>x>>y>>z;}
+    void write () {cout<<x<<" --- "<<y<<" --- "<<z<<"\n";}
+
+    Point3D(double x, double y, double z) : x(x), y(y), z(z) {}
+    Point3D(const Point3D &p) : x(p.x), y(p.y), z(p.z) {}
+    Point3D operator +(Point3D b)  {return Point3D(x+b.x,y+b.y, z+b.z);}
+    Point3D operator -(Point3D b)  {return Point3D(x-b.x,y-b.y, z-b.z);}
+    Point3D operator *(double b) {return Point3D(x*b,y*b, z*b);}
+    Point3D operator /(double b) {return Point3D(x/b,y/b, z/b);}
+    bool operator  <(Point3D b)  {return make_pair(make_pair(x,y),z) < make_pair(make_pair(b.x,b.y),b.z);}
+    bool operator ==(Point3D b)  {return dcmp(x-b.x)==0 && dcmp(y-b.y) == 0 && dcmp(z-b.z) == 0;}
+};
+vector<Point3D>Ball;
+typedef Point3D Vector3D;
+
+namespace Vectorial{
+    double getDot (Vector3D a, Vector3D b)  {return a.x*b.x+a.y*b.y+a.z*b.z;}
+    Vector3D getCross(Vector3D a, Vector3D b) {return Point3D(a.y*b.z-a.z*b.y, a.z*b.x-a.x*b.z, a.x*b.y-a.y*b.x);}
+    double getLength (Vector3D a)         {return sqrt(getDot(a, a)); }
+    double getPLength (Vector3D a)        {return getDot(a, a); }
+    Vector3D unitVector(Vector3D v)         {return v/getLength(v);}
+
+    double getUnsignedAngle(Vector3D u,Vector3D v){
+        double cosTheta = getDot(u,v)/getLength(u)/getLength(v);
+        cosTheta = max(-1.0,min(1.0,cosTheta));
+        return acos(cosTheta);
+    }
+
+    Vector3D rotate(Vector3D a,Vector3D v,double deg){ // rotate a around v with degree of deg
+       // a = unitVector(a);
+        double rad = torad(deg);
+        return v * cos(rad) + getCross(a, v)*sin(rad)+a*getDot(a, v)*(1-cos(rad)) ;
+    }
+}
+
+
+using namespace Vectorial;
+
+void draw_many_balls()
+{
+//    gpu;
+//    gt(80,80,-60);
+//    draw_ball();
+//    gpo;
+
+
+
+//    gpu;
+////    gt(dx,dy,dz);
+//    draw_ball();
+//    draw_ball();
+//    gpo;
+
+    while(Ball.size()<5)
+    {
+        int dx = 40+rng()%80;
+        int dy = 20+rng()%80;
+        int dz = -60;
+        Point3D b;
+        b.x = dx;
+        b.y = dy;
+        b.z = dz;
+        Ball.push_back(b);
+    }
+
+    for(int i=0;i<Ball.size();i++)
+    {
+
+        gpu;
+        gt(Ball[i].x, Ball[i].y, Ball[i].z);
+        draw_ball();
+        gpo;
+    }
+
+
+
+
+}
+
 
 void draw_every()
 {
     draw_room();
     draw_pointer();
-
+    draw_many_balls();
 
 }
 
@@ -336,15 +444,50 @@ void light0()
 
 
 
+
 void mouse( int button, int state, int xpos, int ypos)
 {
 //    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 //    {
 
+    Vector3D s,c,b;
+    s.x = eyex;
+    s.y = eyey;
+    s.z = eyez;
 
-        cout<<ini_x<<" "<<ini_y<<endl;
+    c.x = centerx;
+    c.y = centery;
+    c.z = centerz;
 
-       cout << "Cursor Position at (" << xpos << " : " << ypos << endl;
+    for(int i=0;i<Ball.size();i++)
+    {
+        b = Ball[i];
+        double p,q,r;
+
+        p = getLength(s-c);
+        q = getLength(s-b);
+        r = getLength(b-c);
+        double s1 = (p+q+r)/2;
+        double h = (2*sqrt(s1*(s1-p)*(s1-q)*(s1-r)))/p;
+
+        if(fabs(ball_radius-h)<=ball_radius)
+        {
+            Ball.erase(Ball.begin()+i);
+            break;
+        }
+        cout<<(ball_radius-h)<<" ";
+    }
+    cout<<endl;
+
+
+
+
+
+
+
+      //  cout<<ini_x<<" "<<ini_y<<" "<endl;
+
+       cout << "Cursor Position at (" << xpos << " : " << ypos <<" "<< centerx<<" "<<centery<<endl;
    // }
 }
 
@@ -416,11 +559,11 @@ void mouseMove(int mx, int my) {
 
     //cout<<angle_cal(0,5)<<endl;
 
-    cout<<px<<" : "<<py<<endl;
+    //cout<<px<<" : "<<py<<endl;
 
 
-    centerx-=(double)px/50;
-    centery+=(double)py/50;
+    centerx-=(double)px/40;
+    centery+=(double)py/40;
 
 //    if(centerx<=80 || centerx>=175 ){
 //        sign*=(-1);
@@ -431,7 +574,7 @@ void mouseMove(int mx, int my) {
     anglex = (double)px/10;
     glutPostRedisplay();
 //    cout<<" ang "<<ang<<endl;
-    cout<<centerx<<" cen "<<endl;
+    //cout<<centerx<<" cen "<<endl;
 
     //centery-= (double)py/400;
     SetCursorPos(ini_x, ini_y);
