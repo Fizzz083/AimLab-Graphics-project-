@@ -206,6 +206,10 @@ void draw_color_cube(GLfloat c1,GLfloat c2,GLfloat c3 )
 
 }
 
+#define gleT glEnable(GL_TEXTURE_2D);
+#define glT(id) glBindTexture(GL_TEXTURE_2D, id);
+#define gldT glDisable(GL_TEXTURE_2D);
+
 void draw_floor(GLint id)
 {
     GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -267,16 +271,21 @@ void draw_room()
 
 
     gpu;
-    gs(80,1,80);
+    gt(-8000,0,8000);
+    gs(8000,1,8000);
+//    gleT;
+//    glT(3);
     draw_color_cube(1,1,1);
+    //gldT;
     //draw_floor(1);
     gpo;
 
     gpu;
+    gt(0,0,-60);
     gr(90,0,0,1);
-    gs(80,1,80);
+    gs(80,1,60);
     draw_color_cube(1,0,1);
-    //draw_floor(1);
+    draw_floor(1);
     gpo;
 
 
@@ -289,24 +298,24 @@ void draw_room()
     gpo;
 
     gpu;
-    gt(160,0,0);
+    gt(160,0,-60);
     gr(90,0,0,1);
-    gs(80,1,80);
+    gs(80,1,60);
     draw_color_cube(1,0,1);
-    //draw_floor(2);
+    //draw_floor(1);
     gpo;
 
 }
 
 double ball_radius = 5;
 
-void draw_ball()
+void draw_ball(GLuint c1 = 3,GLuint c2 = 3,GLuint c3 = 1,double ball_radius = 5)
 {
     gpu;
     GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_ambient[] = { 0.6, 0, 0, 1.0 };
-    GLfloat mat_diffuse[] = { 0.3, 0.3, 1,1.0 };
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_ambient[] = { c1*0.2, c2*0.2, c3*0.2, 1.0 };
+    GLfloat mat_diffuse[] = { c1*0.5, c2*0.5, c3*0.5,1.0 };
+    GLfloat mat_specular[] = { c1, c2, c3, 1.0 };
     GLfloat mat_shininess[] = {40};
 
     glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
@@ -379,15 +388,57 @@ void draw_many_balls()
 //    draw_ball();
 //    gpo;
 
+Vector3D s,c,b;
+    s.x = eyex;
+    s.y = eyey;
+    s.z = eyez;
+
+    c.x = centerx;
+    c.y = centery;
+    c.z = centerz;
+
     while(Ball.size()<5)
     {
         int dx = 40+rng()%80;
-        int dy = 20+rng()%80;
-        int dz = -60;
+        int dy= 20+rng()%80;
+        int dz = -40+rng()%40;
         Point3D b;
         b.x = dx;
         b.y = dy;
         b.z = dz;
+        bool f=0;
+
+        for(int i=0;i<Ball.size();i++)
+        {
+            dx= 40+rng()%80;
+            dy = 20+rng()%80;
+            dz = -40+rng()%20;
+            b.x = dx;
+            b.y = dy;
+            b.z = dz;
+
+
+            double d  = getLength(b-Ball[i]);
+            double p = getLength(s-c);
+            double q = getLength(s-b);
+            double r = getLength(b-c);
+            double s1 = (p+q+r)/2;
+            double h1 = (2*sqrt(s1*(s1-p)*(s1-q)*(s1-r)))/p;
+
+            ///p = getLength(s-c);
+            q = getLength(s-Ball[i]);
+            r = getLength(Ball[i]-c);
+            double s2 = (p+q+r)/2;
+            double h2 = (2*sqrt(s2*(s2-p)*(s2-q)*(s2-r)))/p;
+
+
+            cout<<h1<<" "<<h2<<endl;
+            if(d>20 ){
+                    f=1;
+                break;
+            }
+        }
+        //if(f)
         Ball.push_back(b);
     }
 
@@ -406,11 +457,468 @@ void draw_many_balls()
 }
 
 
+int points = 0;
+
+
+void draw_score_text()
+{
+    string s=to_string(points);
+
+
+    int len = s.size();
+    for (int i = 0; i < len; i++) {
+    glutBitmapCharacter(GLUT_BITMAP_8_BY_13, s[i]);
+    }
+}
+
+
+void scoredisplay (int posx, int posy, int posz, int space_char, int scorevar)
+{
+        int j=0,p,k;
+        GLvoid *font_style1 = GLUT_BITMAP_TIMES_ROMAN_24;
+
+        p = scorevar;
+        j = 0;
+        k = 0;
+        while(p > 9)
+        {
+            k = p % 10;
+            glRasterPos3f ((posx-(j*space_char)),posy, posz);
+            glutBitmapCharacter(font_style1,48+k);
+            j++;
+            p /= 10;
+        }
+            glRasterPos3f ((posx-(j*space_char)), posy, posz);
+            glutBitmapCharacter(font_style1,48+p);
+
+}
+
+bool show_score = 1;
+
+void draw_score()
+{
+    gpu;
+    gt(20,150,-90);
+    gs(50,10,2);
+    draw_color_cube(0,1,0);
+    gpo;
+
+    if(show_score==0){
+        return;
+    }
+
+    gpu;
+    //gt(20,150,-50);
+    //gs(50,10,2);
+    //glColor3f(1,1,1);
+
+    draw_color_cube(1,0,0);
+    scoredisplay(50,150,-85,4,points);
+    //draw_score_text();
+    //draw_color_cube(1,1,1);
+    gpo;
+
+}
+
+void draw_gun()
+{
+
+   // gt(10,10,0);
+    gpu;
+    gs(0.5,4,20);
+    gleT;
+    glT(3);
+    //draw_cube();
+    draw_color_cube(0,0,1);
+    gldT;
+    gpo;
+
+    gpu;
+    gt(-0.25,-5,5);
+    gs(0.75,4,20);
+    gleT;
+    glT(5);
+    //draw_cube();
+    draw_color_cube(0,1,1);
+    gldT;
+    gpo;
+
+    gpu;
+    gt(-.5,-7,2.5);
+    gs(0.95,5,15);
+    gleT;
+    glT(3);
+    //draw_cube();
+    draw_color_cube(0.4,0.4,0.4);
+    gldT;
+    gpo;
+
+    gpu;
+    gt(-.75,-14,3);
+    gs(1,10,2);
+    gleT;
+    glT(5);
+    //draw_cube();
+    draw_color_cube(1,1,0.2);
+    gldT;
+    gpo;
+}
+
+double sq(double x1, double y1, double x2, double y2)
+{
+    return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+}
+
+double Pi = acos(-1);
+
+double angle_cal(double x1, double y1, double x2, double y2, double x3, double y3 )
+{
+//    double p12 = sq(x1,y1,x2,y2);
+//    double p13 = sq(x1,y1,x3,y3);
+//    double p23 = sq(x2,y2,x3,y3);
+//
+//    double ap = p12*p12 - p13*p13 + p23*p23;
+//    double bp = 2*p12*p23;
+//
+//    if(bp==0) return 0;
+//
+//    return acos(ap/bp);
+
+
+
+    double result = atan2(y3 - y1, x3 - x1) -
+                atan2(y2 - y1, x2 - x1);
+
+    return result*180/Pi;
+
+}
+
+double gun_point_x = eyex;
+double gun_point_y = eyey-20;
+double gun_point_z = centerz;
+
+void change()
+{
+ gun_point_x = eyex;
+ gun_point_y = eyey-20;
+ gun_point_z = centerz;
+
+}
+bool gun_show = 1;
+double gun_angle = 0;
+void draw_gun_at_eye()
+{
+    double new_gun_point_x = centerx;
+    double new_gun_point_y = centery;
+    double new_gun_point_z = centerz;
+
+    double mid_x = eyex+20;
+    double mid_y = eyey-20;
+    double mid_z = eyez-5;
+
+    //double ang = angle_cal(gun_point_x, gun_point_y,mid_x,mid_y,new_gun_point_x,new_gun_point_y);
+
+    double angx = angle_cal(gun_point_x,gun_point_z,mid_x, mid_z,new_gun_point_x,new_gun_point_z);
+    double angy = angle_cal(gun_point_y,gun_point_z,mid_y, mid_z,new_gun_point_y,new_gun_point_z);
+
+    double dx = ((float) (((float)gun_point_x) - new_gun_point_x)); // how far moved x
+    double dy = ((float) (((float)gun_point_y) - new_gun_point_y)); // how fa moved y
+
+    angx = atan2(dx,mid_z)*180/Pi;
+    angy = atan2(dy,mid_z)*180/Pi;
+
+   // cout<<angx<<" "<<angy<<endl;
+//
+//    //gun_point_x = centerx;
+//    //gun_point_y = centery;
+//
+
+
+    //angx/=10;
+    //angy/=10;
+
+    if(!gun_show)
+    {
+        gt(80,60,80);
+    }
+    else
+        gt(mid_x,mid_y,mid_z);
+
+    gr(gun_angle,1,0,0);
+    gr(angx, 0,1,0);
+    gr(-angy, 1,0,0);
+    //gr(15,0,1,0);
+    draw_gun();
+
+}
+
+
+void draw_sky()
+{
+
+
+    glPushMatrix();
+
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient[] = { 0.0039, .1961, 0.12, 1.0 };
+    GLfloat mat_diffuse[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = {40};
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    glBindTexture(GL_TEXTURE_2D, 2);
+
+
+
+    //glutSolidSphere(1000,1000,1000);
+    draw_ball(1,1,1,700);
+
+
+
+     glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+
+    glDisable(GL_TEXTURE_2D);
+
+
+	glPopMatrix();
+
+
+}
+
+
+void draw_sp()
+{
+    glTranslatef(150,-30,-10);
+    glScalef(0.5,0.5,0.5);
+
+    cout<<" kn "<<endl;
+
+
+
+    glPushMatrix();
+
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient[] = { 0.0039, .1961, 0.12, 1.0 };
+    GLfloat mat_diffuse[] = { 0.0, 1.0, 0.0, 1.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = {40};
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_GEN_S);
+    glEnable(GL_TEXTURE_GEN_T);
+    glBindTexture(GL_TEXTURE_2D, 1);
+
+    glPushMatrix();
+    glTranslatef(0, 0.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(15, 3.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(30, 0.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(30, 1.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(25, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(25, 10.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(20, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(20, 11.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 10.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(20, 20.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+
+    glTranslatef(0,5,10);
+
+    glPushMatrix();
+    glTranslatef(0, 0.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(15, 0.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(30, 0.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(30, 0.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(25, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(25, 10.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(20, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(20, 10.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 10.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(5, 10.0, 5.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(20, 20.0, 0.0);
+    glutSolidSphere(10.0, 50, 50);
+    glPopMatrix();
+
+    glPopMatrix();
+
+
+//    for(double i=60; i>=0; i-=2)
+//    {
+//        for(double j = 0; j<i; j+=5)
+//        {
+//
+//            for(double k=0; k<j; k+=7)
+//            {
+//
+//                glPushMatrix();
+//                glTranslatef(i, -j, k);
+//                glutSolidSphere(10.0, 50, 50);
+//                glPopMatrix();
+//            }
+//        }
+//    }
+
+    glDisable(GL_TEXTURE_GEN_S);
+    glDisable(GL_TEXTURE_GEN_T);
+
+    glDisable(GL_TEXTURE_2D);
+
+
+	glPopMatrix();
+
+}
+
+void draw_tree()
+{
+
+        glTranslatef(10,-20,-80);
+        glScalef(1.5,1.5,1.5);
+        glScalef(2.5,3.5,2.5);
+
+        glPushMatrix();
+        glTranslatef(-100,50,0);
+        draw_sp();
+        glPopMatrix();
+
+        glPushMatrix();
+
+            GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+            GLfloat mat_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+            GLfloat mat_diffuse[] = { .239, .047, 0.008, 1.0 };
+            GLfloat mat_specular[] = { 1, 1, 1, 1.0 };
+            GLfloat mat_shininess[] = {30};
+
+            glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+            glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+            glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+            glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+            glTranslatef(56,4,-4);
+            glScalef(2, 10, 2);
+
+            glEnable(GL_TEXTURE_2D);
+            //glBindTexture(GL_TEXTURE_2D, 4);
+            //draw_cube();
+            draw_color_cube(0,1,1);
+            glDisable(GL_TEXTURE_2D );
+        glPopMatrix();
+}
+
+
+
+
+
+
+
 void draw_every()
 {
     draw_room();
     draw_pointer();
     draw_many_balls();
+    gpu;
+//    if(gun_show)
+//        gt(eyex-20,-20,eyez-5);
+//    else{
+//        gt(80-20,60+5,80-5);
+//    }
+    draw_score();
+    gpo;
+
+    //gt(20,20,20);
+    //if(gun_show)
+    glPushMatrix();
+    draw_gun_at_eye();
+    glPopMatrix();
+
+    glPushMatrix();
+   // glTranslatef(100,0,0);
+    draw_tree();
+
+	glPopMatrix();
+
+	draw_sky();
+
 
 }
 
@@ -441,7 +949,9 @@ void light0()
 }
 
 
-
+#include <chrono>
+#include <ctime>
+auto start = std::chrono::system_clock::now();
 
 
 
@@ -470,14 +980,18 @@ void mouse( int button, int state, int xpos, int ypos)
         double s1 = (p+q+r)/2;
         double h = (2*sqrt(s1*(s1-p)*(s1-q)*(s1-r)))/p;
 
-        if(fabs(ball_radius-h)<=ball_radius)
+        if(fabs(ball_radius-h)<=(ball_radius))
         {
             Ball.erase(Ball.begin()+i);
+            points++;
             break;
         }
-        cout<<(ball_radius-h)<<" ";
+       // cout<<(ball_radius-h)<<" ";
     }
-    cout<<endl;
+    //cout<<endl;
+
+    start = std::chrono::system_clock::now();
+    gun_angle = 15;
 
 
 
@@ -487,7 +1001,7 @@ void mouse( int button, int state, int xpos, int ypos)
 
       //  cout<<ini_x<<" "<<ini_y<<" "<endl;
 
-       cout << "Cursor Position at (" << xpos << " : " << ypos <<" "<< centerx<<" "<<centery<<endl;
+     //  cout << "Cursor Position at :" << xpos << " : " << ypos <<" "<< centerx<<" "<<centery<<endl;
    // }
 }
 
@@ -501,32 +1015,8 @@ sqrt((P1x - P2x)2 + (P1y - P2y)2)
 
 */
 
-double sq(double x1, double y1, double x2, double y2)
-{
-    return sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-}
-
-double angle_cal(double x1, double y1, double x2, double y2, double x3, double y3 )
-{
-    double p12 = sq(x1,y1,x2,y2);
-    double p13 = sq(x1,y1,x3,y3);
-    double p23 = sq(x2,y2,x3,y3);
-
-    double ap = p12*p12 - p13*p13 - p23*p23;
-    double bp = 2*p12*p13;
-
-    if(bp==0) return 0;
-
-    return acos(ap/bp);
 
 
-
-    double result = atan2(y3 - y1, x3 - x1) -
-                atan2(y2 - y1, x2 - x1);
-
-    return result;
-
-}
 
 int last_x = ini_x, last_y=ini_y;
 double sign = 1;
@@ -622,6 +1112,8 @@ void display(void)
 
     light0();
 
+
+
     glRotatef( alpha,axis_x, axis_y, 0.0 );
     glRotatef( theta, axis_x, axis_y, 0.0 );
 
@@ -633,6 +1125,17 @@ void display(void)
     //gt(-80,0,0);
     draw_every();
     gpo;
+
+    auto end_ = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds = end_-start;
+    //std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+    double t= elapsed_seconds.count()*1000;
+    // cout<<"timee  "<<t<<endl;
+    if(t>=50.0) {
+    gun_angle = 0;
+    }
 
     glFlush();
     glutSwapBuffers();
@@ -655,6 +1158,12 @@ void b_swap()
         upz = tmp;
 
     }
+    else{
+
+        eyex = 80;
+        eyey = 60;
+        eyez = 80;
+    }
 }
 
 void bird_view()
@@ -662,6 +1171,7 @@ void bird_view()
 //     init(6);
 //     f=6;
     bv = 1-bv;
+    gun_show = !gun_show;
     b_swap();
 
 }
@@ -691,30 +1201,43 @@ void myKeyboardFunc( unsigned char key, int x, int y )
     case 'a':
         eyex-=2;
         centerx-=2;
+        change();
         break;
+    case 'j':
+        light_switch0^=1;
+//        eyex-=2;
+//        centerx-=2;
+        break;
+
     case 'd':
-        eyex+=2;
-        centerx+=2;
+        eyex+=5;
+        centerx+=5;
+        change();
         break;
     case 'w':
-        eyey+=2;
-        centery+=2;
+        eyey+=5;
+        centery+=5;
+        change();
         break;
     case 's':
-        eyey-=2;
-        centery-=2;
+        eyey-=5;
+        centery-=5;
+        change();
         break;
     case 'f':
-        eyez+=2;
-        centerz+=2;
+        eyez+=5;
+        centerz+=5;
+        change();
         //glutPostRedisplay();
         break;
     case 'g':
-        eyez-=2;
-        centerz-=2;
+        eyez-=5;
+        centerz-=5;
+        change();
         //glutPostRedisplay();
         break;
     case 'b':
+        show_score=!show_score;
         bird_view();
         break;
 
@@ -772,13 +1295,17 @@ int main (int argc, char **argv)
     glutInitWindowPosition(200,200);
     glutInitWindowSize(windowHeight, windowWidth);
     glutCreateWindow("Traingle-Demo");
-
-    //LoadTexture("E:\\Code\\glut\\project_v1\\wall.bmp"); /// 1
-    //LoadTexture("E:\\Code\\glut\\project_v1\\wall_2.bmp"); /// 2
+//
+//    LoadTexture("E:\\Code\\glut\\project_v1\\wall.bmp"); /// 1
+//    LoadTexture("E:\\Code\\glut\\project_v1\\wall_2.bmp"); /// 2
+//    LoadTexture("E:\\Code\\glut\\project_v1\\gun.bmp"); /// 3
+//    LoadTexture("E:\\Code\\glut\\project_v1\\gun2.bmp"); /// 4
+//    LoadTexture("E:\\Code\\glut\\project_v1\\gun_barrel.bmp"); /// 5
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_3.bmp"); /// 2
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_2.bmp"); /// 3
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\tree_wood.bmp"); /// 4
-//    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\glass.bmp"); /// 5
+     LoadTexture("E:\\Code\\glut\\project_v1\\grass.bmp"); /// 5
+     LoadTexture("E:\\Code\\glut\\project_v1\\sky.bmp"); /// 5
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_4.bmp"); /// 6
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_5.bmp"); /// 7
 

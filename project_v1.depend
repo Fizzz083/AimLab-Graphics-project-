@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1665924380 source:e:\code\glut\project_v1\main.cpp
+1667092504 source:e:\code\glut\project_v1\main.cpp
 	<GL/gl.h>
 	<GL/glu.h>
 	<GL/glut.h>
@@ -9,6 +9,8 @@
 	<math.h>
 	<bits/stdc++.h>
 	"include/BmpLoader.h"
+	<chrono>
+	<ctime>
 
 1301111164 c:\program files (x86)\codeblocks\mingw\include\gl\gl.h
 
@@ -241,7 +243,7 @@
 1619331768 e:\code\glut\project_v1\include\bmploader.h
 	<windows.h>
 
-1665815726 source:e:\code\glut\project_v1\src\bmploader.cpp
+1667092558 source:e:\code\glut\project_v1\src\bmploader.cpp
 	"../include/BmpLoader.h"
 	<stdio.h>
 	<iostream>

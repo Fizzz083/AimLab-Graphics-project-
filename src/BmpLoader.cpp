@@ -18,6 +18,7 @@ BmpLoader::BmpLoader(const char* filename)
     fseek(file, bfh.bfOffBits, SEEK_SET);
     fread(textureData, 1, bih.biSizeImage, file);
     unsigned char temp;
+
     for(int i=0; i<bih.biSizeImage; i+=3)
     {
         temp = textureData[i];
@@ -29,6 +30,7 @@ BmpLoader::BmpLoader(const char* filename)
     iWidth = bih.biWidth;
     iHeight = bih.biHeight;
     fclose(file);
+    std::cout<<"file ok"<<std::endl;
 }
 
 BmpLoader::~BmpLoader()
