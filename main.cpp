@@ -1302,6 +1302,78 @@ void check()
 
 }
 
+int mode = 0;
+
+auto game_start = std::chrono::system_clock::now();
+
+
+void Sprint( int x, int y, string st)
+{
+    int l,i;
+
+    l=( st.size() ); // see how many characters are in text string.
+    glRasterPos2i( x, y); // location to start printing text
+    for( i=0; i <l; i++)  // loop until i is greater then l
+    {
+        glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, st[i]); // Print a character on the screen
+    }
+}
+
+void choose_board()
+{
+//    gpu;
+//    gt(eyex-2,eyey-2,eyez-5);
+//    gs(2,2,1);
+//
+//    draw_color_cube(0.5,0.5,0.5);
+//    gpo;
+
+    gpu;
+
+     //gt(eyex-2,eyey-2,eyez-4);
+
+     glColor3f(1,0,0);
+
+     Sprint(eyex-20, eyey+20,"Play Game : 'S' ");
+     Sprint(eyex-20, eyey,"Exit : 'Esc' ");
+//
+     //display_text(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "PLay Game: 'S' ", RGB(1.0f, 0.0f, 0.0f));
+    //display_text("Play Game:> 'S'");
+    gpo;
+
+
+
+}
+
+void game_over_board()
+{
+
+     gpu;
+
+     //gt(eyex-2,eyey-2,eyez-4);
+
+     gt(-1000,0,0);
+     draw_color_cube(1,0,0);
+      gt(1000,0,0);
+
+     int p = points;
+
+     string q = to_string(p);
+
+
+     Sprint(eyex-20, eyey+20,"Score:");
+     Sprint(eyex-2, eyey+20,q);
+     Sprint(eyex-20, eyey,"Play Game : 'S' ");
+     Sprint(eyex-20, eyey-20,"Exit : 'Esc' ");
+//
+     //display_text(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "PLay Game: 'S' ", RGB(1.0f, 0.0f, 0.0f));
+    //display_text("Play Game:> 'S'");
+    gpo;
+
+
+
+}
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
@@ -1329,11 +1401,39 @@ void display(void)
     glutMouseFunc(mouse);
     glutPassiveMotionFunc(mouseMove);
 
-    gpu;
-    //gs(2,5,5);
-    //gt(-80,0,0);
-    draw_every();
-    gpo;
+
+    //cout<<"mode "<<mode<<endl;
+
+     gpu;
+        //gs(2,5,5);
+        //gt(-80,0,0);
+        draw_every();
+        gpo;
+    /*
+    if(mode==0)
+    {
+        gpu;
+        game_over_board();
+        //choose_board();
+        gpo;
+    }
+    else if(mode==1)
+    {
+
+        gpu;
+        //gs(2,5,5);
+        //gt(-80,0,0);
+        draw_every();
+        gpo;
+        //points = 1234;
+       // mode = 3;
+    }
+    else if(mode==3){
+        gpu;
+        game_over_board();
+        gpo;
+    }
+    */
 
     auto end_ = std::chrono::system_clock::now();
 
@@ -1345,6 +1445,20 @@ void display(void)
     if(t>=50.0) {
     gun_angle = 0;
     }
+
+     std::chrono::duration<double> elapsed_seconds_ = end_-game_start;
+    //std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+    double tg= elapsed_seconds_.count()*1000;
+    // cout<<"timee  "<<tg<<endl;
+    if(tg>=20000.0 && mode==1) {
+
+        //    cout<<"done  "<<tg<<endl;
+       mode= 3;
+    //   glutPostRedisplay();
+
+    }
+
 
     glFlush();
     glutSwapBuffers();
@@ -1391,6 +1505,12 @@ void myKeyboardFunc( unsigned char key, int x, int y )
 {
     switch ( key )
     {
+    case 'S':
+        //if(mode==0){
+            mode=1;
+            game_start = std::chrono::system_clock::now();
+        //}
+        break;
     case 'q':
     case 'Q':
         bRotate = !bRotate;
