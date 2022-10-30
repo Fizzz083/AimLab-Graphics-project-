@@ -180,6 +180,49 @@ void draw_cube()
 
 }
 
+static GLubyte c_pyramid_indices[6][4] =
+{
+    {0,3,2,1},
+    {3,7,2,2},
+    {7,4,1,2},
+    {4,0,1,1},
+
+    //{1,2,6,5},
+    {7,4,0,3}
+
+
+};
+
+void draw_color_pyramid()
+{
+    GLfloat mat_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = {60};
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+    glBegin(GL_QUADS);
+    for (GLint i = 0; i <5; i++)
+    {
+        //glColor3f(0.1f, 0.1f, 0.1f);
+        //glColor3f(0.2f, 0.2f, 0.2f);
+        getNormal3p(cube_coordinate[c_pyramid_indices[i][0]][0], cube_coordinate[c_pyramid_indices[i][0]][1], cube_coordinate[c_pyramid_indices[i][0]][2],
+                    cube_coordinate[c_pyramid_indices[i][1]][0], cube_coordinate[c_pyramid_indices[i][1]][1], cube_coordinate[c_pyramid_indices[i][1]][2],
+                    cube_coordinate[c_pyramid_indices[i][2]][0], cube_coordinate[c_pyramid_indices[i][2]][1], cube_coordinate[c_pyramid_indices[i][2]][2]);
+
+        glVertex3fv(&cube_coordinate[c_pyramid_indices[i][0]][0]);glTexCoord2f(1,0);
+        glVertex3fv(&cube_coordinate[c_pyramid_indices[i][1]][0]);glTexCoord2f(1,1);
+        glVertex3fv(&cube_coordinate[c_pyramid_indices[i][2]][0]);glTexCoord2f(0,0);
+        glVertex3fv(&cube_coordinate[c_pyramid_indices[i][3]][0]);glTexCoord2f(0,1);
+    }
+    glEnd();
+
+
+}
+
 void draw_color_cube(GLfloat c1,GLfloat c2,GLfloat c3 )
 {
     GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -670,22 +713,22 @@ void draw_sky()
     glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
 
-    glEnable(GL_TEXTURE_2D);
-    glEnable(GL_TEXTURE_GEN_S);
-    glEnable(GL_TEXTURE_GEN_T);
-    glBindTexture(GL_TEXTURE_2D, 2);
+//    glEnable(GL_TEXTURE_2D);
+//    glEnable(GL_TEXTURE_GEN_S);
+//    glEnable(GL_TEXTURE_GEN_T);
+//    glBindTexture(GL_TEXTURE_2D, 2);
 
 
 
     //glutSolidSphere(1000,1000,1000);
-    draw_ball(1,1,1,700);
+    draw_ball(0.4,0.4,1,700);
 
 
 
-     glDisable(GL_TEXTURE_GEN_S);
-    glDisable(GL_TEXTURE_GEN_T);
-
-    glDisable(GL_TEXTURE_2D);
+//     glDisable(GL_TEXTURE_GEN_S);
+//    glDisable(GL_TEXTURE_GEN_T);
+//
+//    glDisable(GL_TEXTURE_2D);
 
 
 	glPopMatrix();
@@ -699,7 +742,7 @@ void draw_sp()
     glTranslatef(150,-30,-10);
     glScalef(0.5,0.5,0.5);
 
-    cout<<" kn "<<endl;
+   // cout<<" kn "<<endl;
 
 
 
@@ -887,6 +930,163 @@ void draw_tree()
 
 
 
+void draw_wheel (GLfloat c1,GLfloat c2,GLfloat c3, GLfloat radi )
+{
+    GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
+    GLfloat mat_ambient[] = { 0.3*c1, 0.3*c2, 0.3*c3, 1.0 };
+    GLfloat mat_diffuse[] = { c1, c2, c3, 1.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = {40};
+
+    glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv( GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv( GL_FRONT, GL_SHININESS, mat_shininess);
+
+    double circle_radius = radi;
+
+    glBegin(GL_LINES);
+//    glColor3f(1,0,0);
+    for(int i=0; i<1000; ++i)
+    {
+        glVertex2f(0,0);
+        glVertex2f(circle_radius*cos(2*3.14159*i/1000.0),circle_radius*sin(2*3.14159*i/1000.0));
+    }
+    glEnd();
+
+    glBegin(GL_LINES);
+//    glColor3f(1,0,0);
+    for(int i=0; i<1000; ++i)
+    {
+        //glVertex2f(0,0);
+        glVertex3f(circle_radius*cos(2*3.14159*i/1000.0),circle_radius*sin(2*3.14159*i/1000.0), 0);
+        glVertex3f(circle_radius*cos(2*3.14159*i/1000.0),circle_radius*sin(2*3.14159*i/1000.0), 3);
+    }
+    glEnd();
+
+    glTranslatef(0,0,radi);
+
+    glBegin(GL_LINES);
+//    glColor3f(1,0,0);
+    for(int i=0; i<1000; ++i)
+    {
+        glVertex2f(0,0);
+        glVertex2f(circle_radius*cos(2*3.14159*i/1000.0),circle_radius*sin(2*3.14159*i/1000.0));
+    }
+    glEnd();
+
+}
+
+double car_x = 0;
+
+void draw_car()
+{
+    glTranslatef(car_x, 0, 0);
+
+   // glTranslatef(-70,0,0);
+
+    ///body
+    glPushMatrix();
+    glScalef(1.2,1.4,2);
+    glTranslatef(0,0,-40);
+
+
+        glPushMatrix();
+        glTranslatef(11.5,1,60);
+        //glRotatef(90,0,0,1);
+        glScalef(15.5, 1.7, 4);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 7);
+        draw_cube();
+        glDisable(GL_TEXTURE_2D);
+        //draw_color_cube(1,0,0);
+        glPopMatrix();
+
+
+        glPushMatrix();
+        glTranslatef(16,4,60);
+        //glRotatef(90,0,0,1);
+        glScalef(6, 2, 4);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 2);
+        draw_cube();
+        glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+
+
+        glPushMatrix();
+        glTranslatef(28,4,52.5);
+        glRotatef(-90,0,1,0);
+        //glRotatef(90,0,1,0);
+        glScalef(3.5, 2, 4);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 5);
+        draw_color_pyramid();
+        glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(28,4,52);
+        glRotatef(-90,0,1,0);
+        //glRotatef(90,0,1,0);
+        glScalef(4, 1.5, 7.3);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 7);
+        draw_color_pyramid();
+        glDisable(GL_TEXTURE_2D);
+        glPopMatrix();
+
+        glPushMatrix();
+        glTranslatef(16,4,60);
+        glRotatef(-270,0,1,0);
+        //glRotatef(90,0,1,0);
+        glScalef(4, 2, 2);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 2);
+        draw_color_pyramid();
+        glDisable(GL_TEXTURE_2D);
+        //draw_color_pyramid();
+        glPopMatrix();
+    glPopMatrix();
+
+
+
+    ///wheel
+    glPushMatrix();
+    glTranslatef(20,0,38.5);
+    draw_wheel(0.1,0.1,0.1, 2.5);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(44,0,38.5);
+    draw_wheel(0.1,0.1,0.1, 2.5);
+    glPopMatrix();
+
+
+
+    glPushMatrix();
+    glTranslatef(0,0,-16.5);
+    glTranslatef(20,0,38.5);
+    draw_wheel(0.1,0.1,0.1, 2.5);
+    glPopMatrix();
+
+    glPushMatrix();
+    glTranslatef(0,0,-16.5);
+    glTranslatef(44,0,38.5);
+    draw_wheel(0.1,0.1,0.1, 2.5);
+    glPopMatrix();
+}
+
+void draw_cloud()
+{
+    gpu;
+    gt(0,400,-200);
+    glColor3f(1,1,1);
+    draw_sp();
+    gpo;
+
+
+}
 
 
 
@@ -918,6 +1118,15 @@ void draw_every()
 	glPopMatrix();
 
 	draw_sky();
+
+    gpu;
+    gt(-80,10,-200);
+    gr(-40,0,1,0);
+    gs(2,2.5,2);
+	draw_car();
+	gpo;
+
+
 
 
 }
@@ -1171,6 +1380,7 @@ void bird_view()
 //     init(6);
 //     f=6;
     bv = 1-bv;
+    cout<<" bird view "<<endl;
     gun_show = !gun_show;
     b_swap();
 
@@ -1238,6 +1448,7 @@ void myKeyboardFunc( unsigned char key, int x, int y )
         break;
     case 'b':
         show_score=!show_score;
+
         bird_view();
         break;
 
@@ -1295,6 +1506,15 @@ int main (int argc, char **argv)
     glutInitWindowPosition(200,200);
     glutInitWindowSize(windowHeight, windowWidth);
     glutCreateWindow("Traingle-Demo");
+
+    LoadTexture("E:\\Code\\glut\\project_v1\\grass.bmp"); /// 1
+    LoadTexture("E:\\Code\\glut\\project_v1\\car_side_3.bmp"); /// 2
+    LoadTexture("E:\\Code\\glut\\project_v1\\car_side_2.bmp"); /// 3
+    LoadTexture("E:\\Code\\glut\\project_v1\\tree_wood.bmp"); /// 4
+    LoadTexture("E:\\Code\\glut\\project_v1\\glass.bmp"); /// 5
+    LoadTexture("E:\\Code\\glut\\project_v1\\car_side_4.bmp"); /// 6
+    LoadTexture("E:\\Code\\glut\\project_v1\\car_side_5.bmp"); /// 7
+    LoadTexture("E:\\Code\\glut\\project_v1\\leaf.bmp"); /// 8
 //
 //    LoadTexture("E:\\Code\\glut\\project_v1\\wall.bmp"); /// 1
 //    LoadTexture("E:\\Code\\glut\\project_v1\\wall_2.bmp"); /// 2
@@ -1304,8 +1524,8 @@ int main (int argc, char **argv)
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_3.bmp"); /// 2
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_2.bmp"); /// 3
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\tree_wood.bmp"); /// 4
-     LoadTexture("E:\\Code\\glut\\project_v1\\grass.bmp"); /// 5
-     LoadTexture("E:\\Code\\glut\\project_v1\\sky.bmp"); /// 5
+//     LoadTexture("E:\\Code\\glut\\project_v1\\grass.bmp"); /// 5
+//     LoadTexture("E:\\Code\\glut\\project_v1\\sky.bmp"); /// 5
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_4.bmp"); /// 6
 //    LoadTexture("E:\\Code\\glut\\lab4\\lab4_asn_v3\\car_side_5.bmp"); /// 7
 
