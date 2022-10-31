@@ -1242,9 +1242,9 @@ void draw_triangle()
 void draw_fan()
 {
     GLfloat no_mat[] = { 0.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_ambient[] = { 0.3, 0.3, 0.3, 1.0 };
-    GLfloat mat_diffuse[] = { 1.0, 0.0, 0.0, 1.0 };
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+    GLfloat mat_diffuse[] = { .53, 0.53, 0.53, 1.0 };
+    GLfloat mat_specular[] = { 0.8, 0.8, 0.8, 1.0 };
     GLfloat mat_shininess[] = {40};
 
     glMaterialfv( GL_FRONT, GL_AMBIENT, mat_ambient);
@@ -1765,8 +1765,8 @@ void choose_board()
 
     glColor3f(1,0,0);
     init(5);
-    Sprint(60, 65,4,4,"Play Game : 'S' ");
-    Sprint(60, 55,4,4,"Exit : 'Esc' ");
+    Sprint(40, 65,4,5,"Play Game : 'S' ");
+    Sprint(40, 50,4,5,"Exit : 'Esc' ");
 //
     //display_text(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "PLay Game: 'S' ", RGB(1.0f, 0.0f, 0.0f));
     //display_text("Play Game:> 'S'");
@@ -1776,6 +1776,8 @@ void choose_board()
 
 }
 
+
+int hs = 0;
 void game_over_board()
 {
 
@@ -1798,13 +1800,15 @@ void game_over_board()
 
 
 
-    Sprint(20, 100,4,5,"Game Over");
+    Sprint(40, 100,4,5,"Game Over");
     gt(-1000,0,0);
     draw_color_cube(1,1,1);
     gt(1000,0,0);
-    Sprint(20, 60,4,4,"Score: "+q);
-    Sprint(20, 50,4,4,"Play Game : 'S' ");
-    Sprint(20, 40,4,4,"Exit : 'Esc' ");
+    Sprint(40, 60,4,5,"Score: "+q);
+    q = to_string(hs);
+    Sprint(40, 45,4,5,"Highest Score: "+hs);
+    Sprint(40, 30,4,5,"Play Game : 'S' ");
+    Sprint(40, 15,4,5,"Exit : 'Esc' ");
 //
     //display_text(0.0f, 0.0f, GLUT_BITMAP_TIMES_ROMAN_24, "PLay Game: 'S' ", RGB(1.0f, 0.0f, 0.0f));
     //display_text("Play Game:> 'S'");
@@ -1890,8 +1894,10 @@ void display(void)
 
             st=1;
             game_start = std::chrono::system_clock::now();
+            points = 0;
 
         }
+
 
         gpu;
         //gs(2,5,5);
@@ -1904,6 +1910,7 @@ void display(void)
     else if(mode==3){
         st=0;
         init(6);
+
         gpu;
         game_over_board();
         gpo;
